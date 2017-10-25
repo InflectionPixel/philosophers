@@ -39,9 +39,6 @@ namespace DiningPhilosophers
 
             // Initialize the philosophers, and then run them.
             ConfigurePhilosophers();
-
-            RunWithSemaphoresSyncWithOrderedForks();
-	        
         }
 
         #region Colors
@@ -61,71 +58,7 @@ namespace DiningPhilosophers
             _philosophers = (from i in Enumerable.Range(0, NUM_PHILOSOPHERS) select new Ellipse { Height = 75, Width = 75, Fill = Brushes.Red, Stroke = Brushes.Black }).ToArray();
             foreach (var philosopher in _philosophers) circularPanel1.Children.Add(philosopher);
         }
-
-        /// <summary>Gets the fork IDs of the forks for a particular philosopher.</summary>
-        /// <param name="philosopherIndex">The index of the philosopher whose IDs are being retrieved.</param>
-        /// <param name="numForks">The number of forks that exist.</param>
-        /// <param name="left">The ID of the philosopher's left fork.</param>
-        /// <param name="right">The ID of the philosopher's right fork.</param>
-        /// <param name="sort">Whether to sort the forks, so that the left fork is always smaller than the right.</param>
-        private void GetForkIds(int philosopherIndex, int numForks, out int left, out int right, bool sort)
-        {
-            // The forks for a philosopher are the ones at philosopherIndex and philosopherIndex+1, though
-            // the latter can wrap around.  We need to ensure they're always acquired in the right order, to
-            // prevent deadlock, so order them.
-            left = philosopherIndex;
-            right = (philosopherIndex + 1) % numForks;
-            if (sort && left > right)
-            {
-                int tmp = left;
-                left = right;
-                right = tmp;
-            }
-        }
+        
         #endregion
-
-        /// <summary>Runs the philosophers utilizing one thread per philosopher.</summary>
-        private void RunWithSemaphoresSyncWithOrderedForks()
-        {
-            var forks = (from i in Enumerable.Range(0, _philosophers.Length) select new SemaphoreSlim(1, 1)).ToArray();
-            for (int i = 0; i < _philosophers.Length; i++)
-            {
-                int index = i;
-                Task.Factory.StartNew(() => RunPhilosopherSyncWithOrderedForks(forks, index), TaskCreationOptions.LongRunning);
-            }
-        }
-
-        /// <summary>Runs a philosopher synchronously.</summary>
-        /// <param name="forks">The forks, represented as semaphores.</param>
-        /// <param name="index">The philosopher's index number.</param>
-        private void RunPhilosopherSyncWithOrderedForks(SemaphoreSlim[] forks, int index)
-        {
-            // Assign forks
-            int fork1Id, fork2Id;
-            GetForkIds(index, forks.Length, out fork1Id, out fork2Id, true);
-            SemaphoreSlim fork1 = forks[fork1Id], fork2 = forks[fork2Id];
-
-            // Think and Eat, repeatedly
-            var rand = new Random(index);
-            while (true)
-            {
-                // Think (Yellow)
-                _ui.StartNew(() => _philosophers[index].Fill = _think).Wait();
-                Thread.Sleep(rand.Next(10) * TIMESCALE);
-
-                // Wait for forks (Red)
-                fork1.Wait();
-                _ui.StartNew(() => _philosophers[index].Fill = _wait).Wait();
-                fork2.Wait();
-
-                // Eat (Green)
-                _ui.StartNew(() => _philosophers[index].Fill = _eat).Wait();
-                Thread.Sleep(rand.Next(10) * TIMESCALE);
-
-                // Done with forks
-                fork1.Release();
-                fork2.Release();
-            }
-        }
     }
 }
