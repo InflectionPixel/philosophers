@@ -1,0 +1,31 @@
+walkthrough:
+https://en.wikipedia.org/wiki/Dining_philosophers_problem#/media/File:An_illustration_of_the_dining_philosophers_problem.png
+Five silent philosophers sit at a round table with bowls of spaghetti. Forks are placed between each pair of adjacent philosophers.
+Each philosopher must alternately think and eat. However, a philosopher can only eat spaghetti when they have both left and right forks. Each fork can be held by only one philosopher and so a philosopher can use the fork only if it is not being used by another philosopher. After an individual philosopher finishes eating, they need to put down both forks so that the forks become available to others. A philosopher can take the fork on their right or the one on their left as they become available, but cannot start eating before getting both forks.
+
+MainWindow.xaml.cs
+TaskFactory
+ConfigurePhilosophers: Draws circle for each philosopher, controlled by NUM_PHILOSOPHERS
+Run debug to show
+3 colors: YELLOW: thinking, RED: Waiting for a fork, GREEN: Eating
+
+Forks represented by semaphores which restrict access to a resource.
+SemaphoreSlim constructor: initial requests available, maximum requests allowed
+Wait to claim, Release to put down
+
+private void Start()
+{
+	var forks = Enumerable.Range(0, _philosophers.Length).Select(i => new SemaphoreSlim(1, 1)).ToArray();
+	for (int i = 0; i < _philosophers.Length; i++)
+	{
+		int index = i;
+		Task.Factory.StartNew(() => RunPhilosopher(forks, index), TaskCreationOptions.LongRunning);
+	}
+}
+
+private void RunPhilosopher(SemaphoreSlim[] forks, int index)
+{
+}
+
+Add Start call to main method
+

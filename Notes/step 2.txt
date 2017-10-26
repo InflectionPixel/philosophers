@@ -1,0 +1,26 @@
+https://en.wikipedia.org/wiki/Dining_philosophers_problem#/media/File:An_illustration_of_the_dining_philosophers_problem.png
+Plan: Ordered
+
+It assigns a partial order to the resources (the forks, in this case), and establishes the convention that all resources will be requested in order, and that no two resources unrelated by order will ever be used by a single unit of work at the same time. Here, the resources (forks) will be numbered 1 through 5 and each unit of work (philosopher) will always pick up the lower-numbered fork first, and then the higher-numbered fork, from among the two forks they plan to use. The order in which each philosopher puts down the forks does not matter. In this case, if four of the five philosophers simultaneously pick up their lower-numbered fork, only the highest-numbered fork will remain on the table, so the fifth philosopher will not be able to pick up any fork. Moreover, only one philosopher will have access to that highest-numbered fork, so they will be able to eat using two forks.
+
+private void GetForkIds(int philosopherIndex, int numForks, out int left, out int right)
+{
+	// The forks for a philosopher are the ones at philosopherIndex and philosopherIndex+1, though
+	// the latter can wrap around.  We need to ensure they're always acquired in the right order, to
+	// prevent deadlock, so order them.
+	left = philosopherIndex;
+	right = (philosopherIndex + 1) % numForks;
+	if (left > right)
+	{
+		int tmp = left;
+		left = right;
+		right = tmp;
+	}
+}
+
+To RunPhilosopher:
+
+// Assign forks
+int leftForkID, rightForkID;
+GetForkIds(index, forks.Length, out leftForkID, out rightForkID);
+SemaphoreSlim leftFork = forks[leftForkID], rightFork = forks[rightForkID];
