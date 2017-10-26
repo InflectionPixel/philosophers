@@ -39,6 +39,8 @@ namespace DiningPhilosophers
 
 			// Initialize the philosophers, and then run them.
 			ConfigurePhilosophers();
+
+			Start();
 		}
 
 		#region Colors
@@ -58,7 +60,21 @@ namespace DiningPhilosophers
 			_philosophers = (from i in Enumerable.Range(0, NUM_PHILOSOPHERS) select new Ellipse { Height = 75, Width = 75, Fill = Brushes.Red, Stroke = Brushes.Black }).ToArray();
 			foreach (var philosopher in _philosophers) circularPanel1.Children.Add(philosopher);
 		}
-		
+
 		#endregion
+
+		private void Start()
+		{
+			var forks = Enumerable.Range(0, _philosophers.Length).Select(i => new SemaphoreSlim(1, 1)).ToArray();
+			for (int i = 0; i < _philosophers.Length; i++)
+			{
+				int index = i;
+				Task.Factory.StartNew(() => RunPhilosopher(forks, index), TaskCreationOptions.LongRunning);
+			}
+		}
+
+		private void RunPhilosopher(SemaphoreSlim[] forks, int index)
+		{
+		}
 	}
 }
