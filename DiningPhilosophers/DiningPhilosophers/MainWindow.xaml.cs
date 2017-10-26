@@ -94,6 +94,28 @@ namespace DiningPhilosophers
 			int leftForkID, rightForkID;
 			GetForkIds(index, forks.Length, out leftForkID, out rightForkID);
 			SemaphoreSlim leftFork = forks[leftForkID], rightFork = forks[rightForkID];
+
+			// Think and Eat, repeatedly
+			var rand = new Random(index);
+			while (true)
+			{
+				// Think (Yellow)
+				_ui.StartNew(() => _philosophers[index].Fill = _think).Wait();
+				Thread.Sleep(rand.Next(10) * TIMESCALE);
+
+				// Wait for forks (Red)
+				leftFork.Wait();
+				_ui.StartNew(() => _philosophers[index].Fill = _wait).Wait();
+				rightFork.Wait();
+
+				// Eat (Green)
+				_ui.StartNew(() => _philosophers[index].Fill = _eat).Wait();
+				Thread.Sleep(rand.Next(10) * TIMESCALE);
+
+				// Done with forks
+				leftFork.Release();
+				rightFork.Release();
+			}
 		}
 	}
 }
