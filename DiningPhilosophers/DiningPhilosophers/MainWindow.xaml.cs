@@ -73,8 +73,27 @@ namespace DiningPhilosophers
 			}
 		}
 
+		private void GetForkIds(int philosopherIndex, int numForks, out int left, out int right)
+		{
+			// The forks for a philosopher are the ones at philosopherIndex and philosopherIndex+1, though
+			// the latter can wrap around.  We need to ensure they're always acquired in the right order, to
+			// prevent deadlock, so order them.
+			left = philosopherIndex;
+			right = (philosopherIndex + 1) % numForks;
+			if (left > right)
+			{
+				int tmp = left;
+				left = right;
+				right = tmp;
+			}
+		}
+
 		private void RunPhilosopher(SemaphoreSlim[] forks, int index)
 		{
+			// Assign forks
+			int leftForkID, rightForkID;
+			GetForkIds(index, forks.Length, out leftForkID, out rightForkID);
+			SemaphoreSlim leftFork = forks[leftForkID], rightFork = forks[rightForkID];
 		}
 	}
 }
