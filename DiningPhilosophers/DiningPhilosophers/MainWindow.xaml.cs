@@ -20,7 +20,7 @@ namespace DiningPhilosophers
     public partial class MainWindow : Window
     {
         /// <summary>The number of philosophers to employ in the simulation.</summary>
-        private const int NUM_PHILOSOPHERS = 15;
+        private const int NUM_PHILOSOPHERS = 5;
         /// <summary>The timescale to use for thinking and eating (any positive value; the larger, the linearly longer amount of time).</summary>
         private const int TIMESCALE = 200;
         /// <summary>The philosophers, represented as Ellipse WPF objects.</summary>
